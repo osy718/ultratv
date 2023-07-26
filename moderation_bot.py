@@ -1,4 +1,6 @@
 import logging
+import threading
+import streamlit as st
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
@@ -54,6 +56,22 @@ dispatcher.add_handler(CommandHandler('ban', ban_user))
 dispatcher.add_handler(CommandHandler('unban', unban_user))
 dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
-# Start the bot
-updater.start_polling()
-updater.idle()
+def run_bot():
+    # Start the Bot
+    updater.start_polling()
+
+def stop_bot():
+    # Stop the Bot gracefully
+    updater.stop()
+
+# Start the bot in a separate thread
+bot_thread = threading.Thread(target=run_bot)
+bot_thread.start()
+
+# Display Streamlit app
+st.title("Telegram Group Moderation Bot")
+st.write("The bot is running. You can control it using the commands in your Telegram group.")
+
+# Stop the bot when Streamlit app is closed
+if not st._is_running_with_streamlit:
+    stop_bot()
